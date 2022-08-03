@@ -1,0 +1,238 @@
+---
+title: "Tarea 2"
+author: "Eugenio Ortega, Camilo Riquelme"
+date: '2022-05-24'
+output:
+  pdf_document: default
+  html_document: default
+toc: TRUE
+always_allow_html: true
+Carrera: Sociología
+Docente: Valentina Andrade
+Ayudantes: Nicolas Godoy y Dafne Jaime
+Universidad: Alberto Hurtado
+---
+
+## Presentación de la base
+
+La base utilizada, corresponde a la base de datos de la Encuesta Nacional de Empleo del año 2021, realizada por el INE. En especifico el trimestre de junio, julio y agosto del mismo año. El INE (2021) define esta encuesta como: *Un instrumento que nos permite conocer la situación de trabajo que tienen las personas que viven en Chile.*
+
+En particular para esta investigación se utilizaron las siguentes variables:
+
+1. Sexo
+2. Edad
+3. Cine - Clasificación Internacional Normalizada de la Educación.
+4. e23 - ¿Cúal fue el motivo de su despido?
+5. e22- ¿Por qué razón ya no tiene ese empleo, negocio o actividad por cuenta propia?
+6. b14_rev4cl_caenes - Rama de actividad económica de empresa donde trabaja según CAENES 
+7. c9_otro_covid - Respuesta asociada a pandemia COVID-19 en c9_otro, referencia c9, ¿Cuál fue la principal razón por la cual trabajó un número de horas diferente a lo habitual durante la semana pasada en su actividad principal?
+8. e12_otro_covid - Respuesta asociada a pandemia COVID-19 en e12_otro, referencia e12, ¿Por qué motivo no estaría
+disponible para trabajar?
+
+## Paquetes Utilizados
+```{r Paquetes}
+pacman::p_load(haven, tidyverse, sjmisc, sjPlot, kableExtra, tinytex)
+```
+
+```{r procesamiento, echo=FALSE, include=FALSE}
+JJA_proc = readRDS("output/data/datos_proc.rds")
+```
+
+## Análisis descriptivo univariado: Sexo - Edad - Nivel Educacional
+
+```{r Análisis univariado 1 , echo=FALSE}
+JJA_proc %>%
+  select(sexo, edad_tr, cine) %>%
+  frq(show.na = F,
+      out = "viewer",
+      encoding = "UTF-8",
+      sort.frq = "asc") %>% 
+  kable(caption = "Distribución de sexo/edad en tramos/nivel educacional",
+        format = "html", 
+        col.names = c("Valor", "Etiqueta", "F. absoluta", "F. relativa", 
+                      "F. relativa (valida)", "F. rel. acumulada"),
+        position = "center") %>% 
+  kable_classic(full_width = F, 
+                html_font = "Cambria") %>% 
+  footnote("Elaboración propia en base a ENE jun-ago (2021)", 
+           general_title = "Fuente: ")
+```
+
+### Comparación Censo2017
+
+Si comparamos los resultados obtenidos, respecto del Censo2017 vemos que:
+
+En cuanto a la distrubución de sexo, el Censo reporta que un 48,9% de la población son hombres y un 51.1% mujeres.
+
+Se muestra una diferencia de 3.31% en ambos sexos, respecto de la muestra.
+
+En cuanto a los tramos de edad, la estadistica a relevar, corresponde a los tramos de mayor edad, donde se refuerza el envejecimiento de la población chilena, el Censo2017 reporta que solo un 6,6% de la población, para esa fecha, tenia más de 65 años. Los resultados de nuestra base de datos, a pesar de ser un tramo de edad más amplio, demuestran un evidente envejecimiento de la población, un 29.75% de la muestra posee más de 60 años. 
+
+*Fuente: Sintesís de resultados Censo 2017* 
+
+## Análisis descriptivo univariado: Ocupaciones 
+```{r Ocupaciones, echo=FALSE}
+JJA_proc %>%
+  select(activ, ocup_form, b1, b14_rev4cl_caenes) %>%
+  frq(show.na = F,
+      out = "viewer",
+      encoding = "UTF-8",
+      sort.frq = "asc") %>% 
+  kable(caption = "Distribución de Ocupaciones",
+        format = "html", 
+        col.names = c("Valor", "Etiqueta", "F. absoluta", "F. relativa", 
+                      "F. relativa (valida)", "F. rel. acumulada"),
+        position = "center") %>% 
+  kable_classic(full_width = F, 
+                html_font = "Cambria") %>% 
+  footnote("Elaboración propia en base a ENE jun-ago (2021)", 
+           general_title = "Fuente: ")
+
+#Graficos sobre Ocupaciones
+
+plot_frq(JJA_proc, activ,
+         geom.colors = "red",
+         title = "Distribucion Condicion Actividad",
+         type = "bar")
+
+plot_frq(JJA_proc, ocup_form,
+         geom.colors = "green",
+         title = "Distribucion Informalidad",
+         type = "bar")
+
+plot_frq(JJA_proc, b1,
+         geom.colors = "black",
+         title = "Distribucion Grupo Ocupacional (CIUO)",
+         type = "bar")
+
+plot_frq(JJA_proc, b14_rev4cl_caenes,
+         geom.colors = "lightblue",
+         title = "Distribucion Rama de Actividad (CIIU)",
+         type = "bar")
+```
+
+Al analizar la distribución por condición de actividad, vemos que un 48,1% de la muestra se encuentra ocupada, un 4,1% de desempleo y un 47,8% de la muestra no está buscando empleo, ni tiene interés de trabajar, reduciendo interés de trabajo en busqueda de empleo.
+
+Analizando el grafico de distribución de informalidad, vemos que casi un 30% (29,4) de la muestra, está en condición de informalidad, es decir son trabajadores independientes o por sus condiciones laborales se encuentran fuera de las regulaciones del derecho de trabajo. Por el contrario un 70,6% de la muestra manifiesta estar en condiciones de ocupado formal. 
+
+## Análisis descriptivo univariado: Covid19
+
+```{r Covid19, echo=FALSE}
+plot_frq(JJA_proc, e22,
+         geom.colors = "blue",
+         title = "Distribucion Desocupacion",
+         type = "bar")
+
+plot_frq(JJA_proc, e22_covid,
+         geom.colors = "blue",
+         title = "Distribucion Desocupacion covid/no covid",
+         type = "bar")
+
+plot_frq(JJA_proc, e12_otro_covid,
+         geom.colors = "purple",
+         title = "Distribucion Inactividad",
+         type = "bar")
+
+plot_frq(JJA_proc, e23,
+         geom.colors = "black",
+         title = "Distribucion Despidos",
+         type = "bar")
+
+plot_frq(JJA_proc, e23_covid,
+         geom.colors = "blue",
+         title = "Distribucion Desocupacion",
+         type = "bar")
+
+plot_frq(JJA_proc, c9_otro_covid,
+         geom.colors = "yellow",
+         title = "Distribucion Subempleo",
+         type = "bar")
+```
+
+Al analizar las graficas correspondientes a variables, relacionadas por la pandemia Covid19, los datos que más sorprenden corresponden a la cantidad de personas que manifiestan haber sido despedidas por motivos relacionados al Covid19, un 33,8%, lo que tienen estrecha relación con la alta tasa de desempleo que provoco la pandemia. El otro dato importante hace referencia a las personas que manifiestan no estar disponibles para trabajar, producto del Covid19 alcanzando un 68,4%, del total de persona no disponibles para trabajar.
+
+## Análisis descriptivo bivariado Covid19
+
+```{r Análisis bivariado, echo=FALSE}
+#Edad por categoria Informalidad y Tipo de Jornada
+
+sjt.xtab(JJA_proc$edad_tr, JJA_proc$ocup_form,
+         show.col.prc=TRUE,
+         show.row.prc=TRUE,
+         show.summary=FALSE, 
+         encoding = "UTF-8", 
+         title = "Tabla Edad segun Informalidad")
+
+sjt.xtab(JJA_proc$edad_tr, JJA_proc$c2_1_3,
+         show.col.prc=TRUE,
+         show.row.prc=TRUE,
+         show.summary=FALSE, 
+         encoding = "UTF-8", 
+         title = "Tabla Edad segun Tipo de Jornada")
+
+#Activ segun sexo
+plot_grpfrq(JJA_proc$sexo, JJA_proc$activ,
+            type = "bar", title = "SEXO/ACTIV")
+
+################################################################################
+#Grupo Ocupacional y Razones de Desocupacion **************
+
+plot_grpfrq(JJA_proc$b1, JJA_proc$e22_covid, #SIN NA
+            type = "bar", title = "Grupo ocupacional y Razones de despido") 
+
+table(JJA_proc$b1, JJA_proc$e22_covid) #SIN NA
+table(JJA_proc$b1, JJA_proc$e22_covid, exclude=F) #CON NA
+
+table(JJA_proc$b1, JJA_proc$e22) #SIN NA
+table(JJA_proc$b1, JJA_proc$e22, exclude=F) #CON NA
+
+#Rama de Actividad y Motivos de Despido ***************
+
+sjt.xtab(JJA_proc$e23, JJA_proc$b14_rev4cl_caenes,
+         show.col.prc=TRUE,
+         show.row.prc=TRUE,
+         show.summary=FALSE, 
+         encoding = "UTF-8", 
+         title = "Tabla Edad segun Informalidad covid/no covid") #SIN NA
+
+sjt.xtab(JJA_proc$e23, JJA_proc$b14_rev4cl_caenes,
+         show.col.prc=TRUE,
+         show.row.prc=TRUE,
+         show.summary=FALSE,
+         show.na = TRUE,   #CON NA
+         encoding = "UTF-8", 
+         title = "Tabla Edad segun Informalidad covid/no covid")
+
+table(JJA_proc$b14_rev4cl_caenes, JJA_proc$e23_covid) #SIN NA
+table(JJA_proc$b14_rev4cl_caenes, JJA_proc$e23_covid, exclude=F) #CON NA
+
+table(JJA_proc$b14_rev4cl_caenes, JJA_proc$e23) #SIN NA
+table(JJA_proc$b14_rev4cl_caenes, JJA_proc$e23, exclude=F) #CON NA
+################################################################################
+###En las tablas y gráficos anteriores las respuestas contenidas en cada variable###
+###calzan con los NA de la otra variable --no se visualizan valores--###
+
+#Motivo Despido según Sexo
+
+plot_grpfrq(JJA_proc$e23_covid, JJA_proc$sexo,
+            type = "bar", title = "Despido segun sexo covid/no covid")
+
+plot_grpfrq(JJA_proc$e23, JJA_proc$sexo,
+            type = "bar", title = "Despido segun sexo")
+
+sjt.xtab(JJA_proc$sexo, JJA_proc$e23_covid,
+         show.col.prc=TRUE,
+         show.row.prc=TRUE,
+         show.summary=FALSE, 
+         encoding = "UTF-8", 
+         title = "Tabla Edad segun Informalidad covid/no covid")
+
+sjt.xtab(JJA_proc$sexo, JJA_proc$e23,
+         show.col.prc=TRUE,
+         show.row.prc=TRUE,
+         show.summary=FALSE, 
+         encoding = "UTF-8", 
+         title = "Tabla Edad segun Informalidad")
+```
+
+Al analizar la graficas bivariadas, sorprenden dos graficas especificas. La primera es las diferencias por sexo en las condiciones de actividad. Sobre todo las diferencias entre hombres y mujeres fuera de la fuerza de trabajo, que alcanza un 15.8%. La segunda grafica a describir es el cruce entre sexo y razón de despido. Sorprende la diferencia de despidos entre hombres y mujeres, en ambos casos las mujeres fueron más despedidas que los hombres. 
